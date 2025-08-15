@@ -1,0 +1,379 @@
+ <!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FootyLive – Football Scores, Table, Fixtures & News</title>
+  <style>
+    :root{
+      --bg:#0b0f14; --panel:#0f1620; --muted:#8892a6; --text:#e6eefc; --brand:#10b981; --brand-2:#3b82f6; --stroke:#1e2837;
+      --shadow: 0 8px 24px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font:14px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial; background:var(--bg); color:var(--text)}
+    a{color:inherit;text-decoration:none}
+    .container{max-width:1150px;margin:auto;padding:0 16px}
+    .nav{position:sticky;top:0;z-index:20;backdrop-filter:saturate(140%) blur(6px);background:rgba(11,15,20,.75);border-bottom:1px solid var(--stroke)}
+    .nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px}
+    .brand{display:flex;gap:10px;align-items:center;font-weight:800;letter-spacing:.2px}
+    .brand-badge{width:28px;height:28px;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand-2));display:grid;place-items:center;box-shadow:var(--shadow)}
+    .brand-badge svg{width:18px;height:18px;fill:white}
+    .nav-links{display:none;gap:18px;color:#c8d3e6}
+    .btn{display:inline-flex;gap:8px;align-items:center;padding:10px 14px;border:1px solid var(--stroke);border-radius:14px;background:#0d131c}
+    .btn:hover{background:#0e1520}
+
+    .hero{padding:28px 0 8px;background:radial-gradient(1200px 600px at 0% -10%, rgba(16,185,129,.18), transparent 60%),
+                              radial-gradient(800px 400px at 100% -20%, rgba(59,130,246,.18), transparent 60%)}
+    .hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:28px}
+    h1{font-size:36px;margin:0 0 10px}
+    .muted{color:var(--muted)}
+    .cards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .card{border:1px solid var(--stroke);border-radius:16px;padding:14px;background:var(--panel);box-shadow:var(--shadow)}
+    .scoreline{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:16px}
+    .badge{display:inline-block;font-size:11px;color:var(--muted);margin-bottom:8px}
+
+    .section{padding:26px 0}
+    .section h2{margin:0 0 8px;font-size:22px}
+
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    input[type="search"], select{background:#0d131c;color:var(--text);border:1px solid var(--stroke);border-radius:12px;padding:10px 12px;outline:none}
+
+    .grid{display:grid;gap:12px}
+    @media(min-width:900px){.grid-3{grid-template-columns:repeat(3,1fr)}.grid-2{grid-template-columns:repeat(2,1fr)}}
+
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    thead{background:#0e1520}
+    th,td{padding:10px;border-top:1px solid var(--stroke)}
+    tbody tr:hover{background:#0e1520}
+    td.team{display:flex;gap:8px;align-items:center}
+    .crest{width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,var(--brand-2),var(--brand))}
+
+    .news img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:12px;border:1px solid var(--stroke)}
+    .news h3{margin:8px 0 4px;font-size:16px}
+
+    .footer{border-top:1px solid var(--stroke);padding:20px 0;margin-top:30px;color:#a9b6cd}
+    .right-rail{position:sticky;top:96px;display:grid;gap:12px}
+
+    /* Simple donut chart */
+    .donut{width:100%;max-width:320px;display:block;margin:auto}
+    .legend{display:flex;gap:10px;justify-content:center;margin-top:8px;color:#a9b6cd;font-size:12px}
+    .legend span{display:inline-flex;gap:6px;align-items:center}
+    .legend b{width:10px;height:10px;border-radius:2px;display:inline-block}
+
+    @media(max-width:900px){.hero-grid{grid-template-columns:1fr}.nav-links{display:none}}
+    @media(min-width:800px){.nav-links{display:flex}}
+  </style>
+</head>
+<body>
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="container nav-inner">
+      <div class="brand">
+        <span class="brand-badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M4 15c3 1 5 2 8 2s5-1 8-2v-2c-3 1-5 2-8 2s-5-1-8-2v2zM6 9l-2 2c3 1 5 2 8 2s5-1 8-2l-2-2c-3 1-5 2-6 2s-3-1-6-2z"/></svg>
+        </span>
+        <span>FootyLive</span>
+      </div>
+      <div class="nav-links">
+        <a href="#scores">Live Scores</a>
+        <a href="#table">Table</a>
+        <a href="#fixtures">Fixtures</a>
+        <a href="#news">News</a>
+      </div>
+      <button id="themeBtn" class="btn" aria-label="Toggle theme">🌗 Theme</button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="container hero-grid">
+      <div>
+        <h1>ERNEST Real‑time football scores, fixtures & analysis</h1>
+        <p class="muted">Follow matches live, explore league tables, and read fresh analysis — all in one sleek, responsive interface.</p>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <a class="btn" href="#scores">▶ Live Now</a>
+          <a class="btn" href="#news">📰 Latest Stories</a>
+        </div>
+      </div>
+      <div class="cards" id="heroCards"></div>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="container" style="display:grid;gap:24px">
+    <!-- Live Scores -->
+    <section id="scores" class="section">
+      <div style="display:flex;align-items:end;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div>
+          <h2>Live Scores</h2>
+          <div class="muted" style="font-size:12px">Updated in real-time • Mock data</div>
+        </div>
+        <div class="toolbar">
+          <input id="q" type="search" placeholder="Search teams…" />
+          <select id="league">
+            <option value="all">All Leagues</option>
+          </select>
+        </div>
+      </div>
+      <div id="scoreGrid" class="grid grid-3" style="margin-top:12px"></div>
+    </section>
+
+    <section id="table" class="section" style="display:grid;grid-template-columns:2fr 1fr;gap:16px">
+      <div>
+        <h2>Table</h2>
+        <div class="muted" id="tableLeagueLabel" style="margin-bottom:8px;font-size:12px"></div>
+        <div class="card" style="padding:0">
+          <table id="standings"></table>
+        </div>
+      </div>
+      <aside class="right-rail">
+        <div class="card">
+          <div class="muted" style="font-size:12px;margin-bottom:6px">Possession</div>
+          <svg class="donut" viewBox="0 0 42 42" aria-label="Possession donut">
+            <circle cx="21" cy="21" r="15.915" fill="none" stroke="#122033" stroke-width="8"></circle>
+            <circle id="homeArc" cx="21" cy="21" r="15.915" fill="none" stroke="#10b981" stroke-width="8" stroke-dasharray="60 40" stroke-dashoffset="25"></circle>
+            <circle id="awayArc" cx="21" cy="21" r="15.915" fill="none" stroke="#3b82f6" stroke-width="8" stroke-dasharray="40 60" stroke-dashoffset="-15"></circle>
+            <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="8" fill="#c8d3e6">60% / 40%</text>
+          </svg>
+          <div class="legend"><span><b style="background:#10b981"></b>Home</span><span><b style="background:#3b82f6"></b>Away</span></div>
+        </div>
+        <div class="card">
+          <div class="muted" style="font-size:12px;margin-bottom:6px">Quick Bytes</div>
+          <ul style="margin:0;padding-left:16px;color:#c8d3e6">
+            <li>In‑form winger completes 10th successful take‑on.</li>
+            <li>Keeper's PSxG: 1.2 saved beyond expected.</li>
+            <li>Set‑pieces: 7 corners in last 20 minutes.</li>
+          </ul>
+        </div>
+      </aside>
+    </section>
+
+    <!-- Fixtures -->
+    <section id="fixtures" class="section">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <h2>Fixtures</h2>
+        <select id="fxLeague"></select>
+      </div>
+      <div id="fixturesGrid" class="grid grid-2" style="margin-top:12px"></div>
+    </section>
+
+    <!-- News -->
+    <section id="news" class="section">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <h2>Latest News</h2>
+        <a class="muted" href="#">View all ↗</a>
+      </div>
+      <div id="newsGrid" class="grid grid-3 news" style="margin-top:12px"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container" style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <div>⭐ Built for demo — replace mock data with your API</div>
+      <div style="display:flex;gap:12px"><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Contact</a></div>
+    </div>
+  </footer>
+
+  <script>
+    // ----------------------- Mock Data -----------------------
+    const LEAGUES = [
+      { id: 'epl', name: 'Premier League', country: 'England' },
+      { id: 'laliga', name: 'La Liga', country: 'Spain' },
+      { id: 'seriea', name: 'Serie A', country: 'Italy' },
+      { id: 'bundesliga', name: 'Bundesliga', country: 'Germany' },
+    ];
+
+    const LIVE_SCORES = [
+      { id:'m1', league:'epl', status:"Live 67'", home:{ name:'Arsenal', score:2 }, away:{ name:'Chelsea', score:1 }, venue:'Emirates', city:'London, UK', kickoff:'19:30', xg:{home:1.8, away:1.2}, stats:{homePoss:58, awayPoss:42}, highlights:true },
+      { id:'m2', league:'laliga', status:"HT 45+2'", home:{ name:'Barcelona', score:0 }, away:{ name:'Sevilla', score:0 }, venue:'Montjuïc', city:'Barcelona, ES', kickoff:'20:00', xg:{home:0.7, away:0.3}, stats:{homePoss:64, awayPoss:36}, highlights:false },
+      { id:'m3', league:'bundesliga', status:'FT', home:{ name:'Bayern', score:3 }, away:{ name:'Leipzig', score:2 }, venue:'Allianz Arena', city:'Munich, DE', kickoff:'18:00', xg:{home:2.6, away:1.4}, stats:{homePoss:55, awayPoss:45}, highlights:true },
+    ];
+
+    const STANDINGS = {
+      epl: [
+        { pos:1, team:'ERNEST FC', p:3, w:3, d:0, l:0, gf:7, ga:2, pts:9 },
+        { pos:2, team:'Man City', p:3, w:3, d:0, l:0, gf:6, ga:1, pts:9 },
+        { pos:3, team:'Liverpool', p:3, w:2, d:1, l:0, gf:5, ga:2, pts:7 },
+        { pos:4, team:'Chelsea', p:3, w:2, d:0, l:1, gf:5, ga:3, pts:6 },
+      ],
+      laliga: [
+        { pos:1, team:'Real Madrid', p:3, w:3, d:0, l:0, gf:8, ga:2, pts:9 },
+        { pos:2, team:'Barcelona', p:3, w:2, d:1, l:0, gf:6, ga:2, pts:7 },
+      ],
+      seriea: [
+        { pos:1, team:'Inter', p:3, w:3, d:0, l:0, gf:9, ga:2, pts:9 },
+      ],
+      bundesliga: [
+        { pos:1, team:'Bayern', p:3, w:3, d:0, l:0, gf:10, ga:3, pts:9 },
+      ]
+    };
+
+    const FIXTURES = [
+      { id:'f1', date:'2025-08-16', league:'epl', matches:[{ home:'ERNEST FC', away:'Newcastle', kickoff:'17:30' },{ home:'Spurs', away:'Everton', kickoff:'15:00' }] },
+      { id:'f2', date:'2025-08-17', league:'laliga', matches:[{ home:'Real Sociedad', away:'Real Madrid', kickoff:'20:00' },{ home:'Valencia', away:'Barcelona', kickoff:'18:00' }] },
+    ];
+
+    const NEWS = [
+      { id:'n1', title:'Arsenal edge derby to stay perfect', summary:"A late header kept Arsenal's 100% record intact in a heated London derby.", tag:'Match Report', image:'https://images.unsplash.com/photo-1517927033932-b3d18e61fb3a?q=80&w=1200&auto=format&fit=crop' },
+      { id:'n2', title:'Analytics: Are high press teams peaking early?', summary:'Tracking PPDA and field tilt across Europe\'s top leagues suggests a tactical shift in August fixtures.', tag:'Analysis', image:'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=1200&auto=format&fit=crop' },
+      { id:'n3', title:'Five U21 talents lighting up the league', summary:'From academy graduates to bargain signings, these youngsters are driving early-season storylines.', tag:'Scouting', image:'https://images.unsplash.com/photo-1471295253337-3ceaaedca402?q=80&w=1200&auto=format&fit=crop' },
+    ];
+
+    // ----------------------- Utilities -----------------------
+    const $ = (sel, ctx=document) => ctx.querySelector(sel);
+    const $$ = (sel, ctx=document) => Array.from(ctx.querySelectorAll(sel));
+    const el = (tag, props={}) => Object.assign(document.createElement(tag), props);
+    const crest = (name) => {
+      const c = el('span', { className:'crest', title:name });
+      return c;
+    };
+    const fmtDate = (d) => new Date(d).toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
+
+    // ----------------------- Populate UI -----------------------
+    function renderHero(){
+      const wrap = $('#heroCards');
+      LIVE_SCORES.slice(0,4).forEach(m => {
+        const card = el('div', { className:'card' });
+        card.append(el('div',{ className:'badge', textContent:m.status }));
+        const row = el('div', { className:'scoreline' });
+        row.append(el('span',{ textContent:m.home.name }));
+        row.append(el('span',{ textContent:`${m.home.score} - ${m.away.score}` }));
+        row.append(el('span',{ textContent:m.away.name }));
+        card.append(row);
+        card.append(el('div',{ className:'muted', style:'margin-top:6px;font-size:12px', textContent:m.city }));
+        wrap.append(card);
+      });
+    }
+
+    function populateLeagues(){
+      const leagueSel = $('#league');
+      LEAGUES.forEach(l => leagueSel.append(new Option(l.name, l.id)));
+
+      const fxSel = $('#fxLeague');
+      LEAGUES.forEach(l => fxSel.append(new Option(l.name, l.id)));
+    }
+
+    function renderScores(){
+      const leagueFilter = $('#league').value;
+      const q = $('#q').value.toLowerCase();
+      const grid = $('#scoreGrid');
+      grid.innerHTML = '';
+      LIVE_SCORES.filter(m => leagueFilter==='all' ? true : m.league===leagueFilter)
+        .filter(m => (m.home.name + ' ' + m.away.name).toLowerCase().includes(q))
+        .forEach(m => {
+          const card = el('div',{ className:'card' });
+          const top = el('div',{ style:'display:flex;justify-content:space-between;color:#a9b6cd;font-size:12px' });
+          top.append(el('span',{ textContent: LEAGUES.find(l=>l.id===m.league)?.name || '' }));
+          top.append(el('span',{ textContent: m.status }));
+          card.append(top);
+
+          const line = el('div',{ className:'scoreline', style:'margin-top:6px' });
+          line.append(el('span',{ textContent:m.home.name }));
+          line.append(el('span',{ textContent:`${m.home.score} - ${m.away.score}` }));
+          line.append(el('span',{ textContent:m.away.name }));
+          card.append(line);
+
+          const stats = el('div',{ style:'display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px' });
+          const xg = el('div',{ className:'card', style:'padding:10px' });
+          xg.append(el('div',{ className:'muted', style:'font-size:12px', textContent:'xG' }));
+          xg.append(el('div',{ style:'font-weight:700', textContent:`${m.xg.home.toFixed(1)} - ${m.xg.away.toFixed(1)}` }));
+          const poss = el('div',{ className:'card', style:'padding:10px' });
+          poss.append(el('div',{ className:'muted', style:'font-size:12px', textContent:'Possession' }));
+          poss.append(el('div',{ style:'font-weight:700', textContent:`${m.stats.homePoss}% - ${m.stats.awayPoss}%` }));
+          stats.append(xg, poss);
+          card.append(stats);
+
+          const meta = el('div',{ style:'display:flex;justify-content:space-between;color:#a9b6cd;font-size:12px;margin-top:8px' });
+          meta.append(el('div',{ textContent:m.kickoff }));
+          meta.append(el('div',{ textContent:m.venue }));
+          card.append(meta);
+
+          const btn = el('button',{ className:'btn', style:'width:100%;margin-top:10px;justify-content:center', textContent:'Match Centre →' });
+          card.append(btn);
+
+          grid.append(card);
+        });
+    }
+
+    function renderTable(league='epl'){
+      $('#tableLeagueLabel').textContent = LEAGUES.find(l=>l.id===league)?.name || '';
+      const table = $('#standings');
+      table.innerHTML = '';
+      const thead = el('thead');
+      const trh = el('tr');
+      ['Pos','Team','P','W','D','L','GF','GA','Pts'].forEach(h=>{
+        const th = el('th',{ textContent:h });
+        trh.append(th);
+      });
+      thead.append(trh);
+      table.append(thead);
+      const tbody = el('tbody');
+      (STANDINGS[league]||[]).forEach(row=>{
+        const tr = el('tr');
+        tr.append(el('td',{ textContent:row.pos }));
+        const teamTd = el('td',{ className:'team' });
+        teamTd.append(crest(row.team), el('span',{ textContent:row.team }));
+        tr.append(teamTd);
+        ['p','w','d','l','gf','ga','pts'].forEach(k=> tr.append(el('td',{ textContent:row[k] })));
+        tbody.append(tr);
+      });
+      table.append(tbody);
+    }
+
+    function renderFixtures(league='epl'){
+      const grid = $('#fixturesGrid');
+      grid.innerHTML = '';
+      FIXTURES.filter(f=>f.league===league).forEach(g=>{
+        const card = el('div',{ className:'card' });
+        card.append(el('div',{ className:'muted', style:'font-size:12px;margin-bottom:6px', textContent:fmtDate(g.date) }));
+        g.matches.forEach(m=>{
+          const row = el('div',{ className:'card', style:'display:flex;align-items:center;justify-content:space-between;padding:10px;background:#0e1520;margin-top:6px' });
+          const left = el('div');
+          left.append(el('strong',{ textContent:m.home }), document.createTextNode(' vs '), el('strong',{ textContent:m.away }));
+          const right = el('div',{ className:'muted', textContent:m.kickoff });
+          row.append(left,right);
+          card.append(row);
+        });
+        grid.append(card);
+      });
+    }
+
+    function renderNews(){
+      const grid = $('#newsGrid');
+      NEWS.forEach(n=>{
+        const card = el('article',{ className:'card' });
+        const img = el('img',{ src:n.image, alt:n.title, loading:'lazy' });
+        const tag = el('div',{ className:'badge', textContent:n.tag });
+        const title = el('h3',{ textContent:n.title });
+        const sum = el('div',{ className:'muted', textContent:n.summary });
+        card.append(img, tag, title, sum);
+        grid.append(card);
+      });
+    }
+
+    // ----------------------- Events -----------------------
+    $('#q').addEventListener('input', renderScores);
+    $('#league').addEventListener('change', ()=>{
+      renderScores();
+      renderTable($('#league').value==='all' ? 'epl' : $('#league').value);
+    });
+    $('#fxLeague').addEventListener('change', e=>renderFixtures(e.target.value));
+
+    $('#themeBtn').addEventListener('click', ()=>{
+      document.documentElement.classList.toggle('light');
+      const light = document.documentElement.classList.contains('light');
+      document.body.style.background = light ? '#f6f8fc' : 'var(--bg)';
+      document.body.style.color = light ? '#0b1220' : 'var(--text)';
+    });
+
+    // ----------------------- Init -----------------------
+    renderHero();
+    populateLeagues();
+    renderScores();
+    renderTable('epl');
+    renderFixtures('epl');
+    renderNews();
+  </script>
+</body>
+</html>
